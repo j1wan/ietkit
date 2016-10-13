@@ -14,3 +14,64 @@ StripAndSplit <- function(l, n.split = 10, n.strip = 0) {
   m <- floor(n/n.split)
   return(lapply(1:n.split, function(i) l[((i-1)*m+1):(i*m)]))
 }
+
+
+#' @export
+#'
+mid.w1 <- function(intervals, win.size) {
+  n = length(intervals)
+  s = (n - win.size) %/% 2
+  return(intervals[(s+1):(s+win.size)])
+}
+
+#' @export
+#'
+mid.w2 <- function(intervals, win.size) {
+  n = length(intervals)
+  m = n %/% 2
+  return(list(intervals[(m - win.size+1):m], intervals[(m+1):(m+win.size)]))
+}
+
+
+#' @export
+#'
+SelfDist <- function(dataset, win.size, sample.size) {
+  candidates <- which(dataset$n.post > 2*win.size)
+  targets <- sample(candidates, min(length(candidates), szmple.size))
+  data <- dataset[targets, ]
+
+  tau <- lapply(data$intervals, function(x) {
+    mid.w2(as.integer(unlist(strsplit(x, '-'))), win.size)
+  })
+
+  P <- lapply(tau, function(x) lapply(x, KDE.int))
+  d.self <- sapply(P, function(P.u) JSDist(P.u[[1]], P.u[[2]], .param.int$dx))
+
+  return(d.self)
+}
+
+#' @export
+#'
+RefDist <- function(dataset, win.size, sample.size) {
+  # ramdon sample 1000 target users
+  candidates <- which(dataset$n.post > win.size)
+  targets <- sample(candidates, min(length(candidates), sample.size))
+  data <- dataset[targets, ]
+
+  # get inter-event times
+  tau <- lapply(data$intervals, function(x) {
+    mid.w1(as.integer(unlist(strsplit(x, '-'))), win.size)
+  })
+
+  # calculate interval signature for each user
+  P <- lapply(tau, KDE.int)
+
+  # calculate reference distance
+  d.ref <- outer(1:length(P), 1:length(P), Vectorize(function(u, v) {
+    if (u < v)
+      return(JSDist(P[[u]], P[[v]], .param.int$dx))
+    return(NA)
+  }))
+
+  return(d.ref[!is.na(d.ref)])
+}

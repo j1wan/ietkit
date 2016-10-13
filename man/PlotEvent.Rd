@@ -4,7 +4,7 @@
 \alias{PlotEvent}
 \title{Timestamp plotting}
 \usage{
-PlotEvent(timestamps, ...)
+PlotEvent(timestamps, alpha = 1/4, ...)
 }
 \arguments{
 \item{UNIX}{timestamps/epochs of an event series}

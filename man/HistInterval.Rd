@@ -4,7 +4,7 @@
 \alias{HistInterval}
 \title{HistInterval}
 \usage{
-HistInterval(intervals, main = "")
+HistInterval(intervals, main = "", ...)
 }
 \arguments{
 \item{intervals}{a vector of inter-event times}
